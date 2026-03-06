@@ -4,29 +4,27 @@ using UnityEngine.Tilemaps;
 using UnityEngine.U2D;
 using UnityEngine.UI;
 
-// 每次reset就直接重开Scene，保证重置状态
 public class TileButton : MonoBehaviour, IPointerClickHandler
 {
-    private int tileIndex;          // 当前按钮对应的棋盘索引（0-8）
+    private int tileIndex;       
     public Sprite playerImage; 
     public Sprite aiImage;
     public Sprite emptyImage;
     public GameObject tileImage;
-    private Button selfButton;      // 按钮自身组件（用于控制是否可点击）
+    private Button selfButton;     
     private void Awake()
     {
-        selfButton = GetComponent<Button>();     // 每个按钮的Button组件独立
+        selfButton = GetComponent<Button>();   
     }
     private void Start()
     {
-        tileIndex = transform.GetSiblingIndex(); // 每个按钮的索引独立
+        tileIndex = transform.GetSiblingIndex();
 
         playerImage = Resources.Load<Sprite>("Images/o");
         aiImage = Resources.Load<Sprite>("Images/x");
         emptyImage = Resources.Load<Sprite>("Images/empty");
     }
 
-    // 鼠标点击触发（仅当前按钮响应）
     public void OnPointerClick(PointerEventData eventData)
     {
         // 只有满足“玩家回合、游戏激活、按钮可点击”才响应
@@ -35,12 +33,11 @@ public class TileButton : MonoBehaviour, IPointerClickHandler
             
             GameManager.instance.PlayerMove(tileIndex);
             tileImage.SetActive(true);
-            tileImage.GetComponent<Image>().sprite = playerImage; // 显示玩家棋子
+            tileImage.GetComponent<Image>().sprite = playerImage; 
             selfButton.interactable = false;
         }
     }
-
-    //电脑落子时调用
+    //电脑用的
     public void SetTileSpriteAndDisable()
     {
         selfButton.interactable = false;
@@ -54,7 +51,6 @@ public class TileButton : MonoBehaviour, IPointerClickHandler
         tileImage.SetActive(false);
     }
 
-    // 可选：暴露索引供外部获取（比如GameManager需要确认按钮对应位置）
     public int GetTileIndex()
     {
         return tileIndex;
