@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=1920, height=1080, user-scalable=no">
+    <title>Unity WebGL (1920×1080 固定尺寸)</title>
+    <style>
+        /* 页面基础样式，消除默认边距 */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #232323;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* 核心：固定 Canvas 尺寸为 1920×1080 */
+        #unity-canvas {
+            width: 1920px !important;
+            height: 1080px !important;
+            background: #232323;
+            display: block;
+        }
+
+        /* 全屏按钮样式 */
+        #unity-fullscreen-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            background: #444;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+            font-size: 16px;
+            z-index: 10;
+        }
+        #unity-fullscreen-button:hover {
+            background: #666;
+        }
+
+        /* 加载进度条样式（保留默认体验） */
+        #unity-loading-bar {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+        }
+        #unity-progress-bar-empty {
+            width: 200px;
+            height: 20px;
+            border: 1px solid white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        #unity-progress-bar-full {
+            width: 0%;
+            height: 100%;
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- 固定尺寸的游戏画布 -->
+    <canvas id="unity-canvas"></canvas>
+    <!-- 全屏按钮 -->
+    <button id="unity-fullscreen-button">⛶</button>
+    <!-- 加载进度条 -->
+    <div id="unity-loading-bar">
+        <div id="unity-progress-bar-empty">
+            <div id="unity-progress-bar-full"></div>
+        </div>
+    </div>
+
+    <script>
+        // 获取页面元素
+        const canvas = document.querySelector("#unity-canvas");
+        const fullscreenButton = document.querySelector("#unity-fullscreen-button");
+        const loadingBar = document.querySelector("#unity-loading-bar");
+        const progressBarFull = document.querySelector("#unity-progress-bar-full");
+
+        // 加载 Unity 游戏（Unity 打包后会自动替换以下变量）
+        const buildUrl = "Build";
+        const loaderUrl = buildUrl + "/[NAME].loader.js";
+        const config = {
+            dataUrl: buildUrl + "/[NAME].data",
+            frameworkUrl: buildUrl + "/[NAME].framework.js",
+            codeUrl: buildUrl + "/[NAME].wasm",
+            streamingAssetsUrl: "StreamingAssets",
+            companyName: "DefaultCompany",
+            productName: "[PRODUCT_NAME]",
+            productVersion: "0.1",
+        };
+
+        // 显示加载进度条
+        loadingBar.style.display = "block";
+
+        // 加载游戏并初始化
+        createUnityInstance(canvas, config, (progress) => {
+            progressBarFull.style.width = 100 * progress + "%";
+        }).then((unityInstance) => {
+            // 加载完成后隐藏进度条
+            loadingBar.style.display = "none";
+            // 绑定全屏按钮点击事件
+            fullscreenButton.onclick = () => {
+                unityInstance.SetFullscreen(1);
+            };
+        }).catch((message) => {
+            alert(message);
+        });
+    </script>
+</body>
+</html>
