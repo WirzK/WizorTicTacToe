@@ -17,4 +17,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/SaveScene.unity
     guid: eb8416ebe5e02604599a7ebdab38568d
+  - enabled: 1
+    path: Assets/Scenes/EndlessScene.unity
+    guid: 516f1086e74a04344a8f694ea9e20b8d
   m_configObjects: {}

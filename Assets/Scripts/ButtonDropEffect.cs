@@ -2,44 +2,39 @@
 using UnityEngine.UI;
 using System.Collections;
 
-
 public class ButtonDropEffect : MonoBehaviour
 {
     [Header("按钮和作用对象")]
-    public Button triggerButton;   
-    public Transform targetObject; 
+    public Button triggerButton;
+    public Transform targetObject;
 
-    [Header("动画模式开关")]
-    [Tooltip("启用：先上升→后加速无限下坠（按钮仅可点击一次）；禁用：上升后复位（按钮可重复用）")]
-    public bool enableRiseThenFall = true;
 
     [Header("上升动画参数")]
-    public float moveUpDistance = 50f;    
-    public float riseDuration = 0.3f;     
-    public bool riseSmoothly = true;     
+    public float moveUpDistance = 50f;
+    public float riseDuration = 0.3f;
+    public bool riseSmoothly = true;
 
-    [Header("坠落动画参数（启用无限下坠时生效）")]
-    public float gravityAcceleration = 200f; 
-    public float initialFallSpeed = 0f;     
+    [Header("坠落动画参数（需启用下坠）")]
+    public bool enableRiseThenFall = true;
+    public float gravityAcceleration = 200f;
+    public float initialFallSpeed = 0f;
 
     [Header("其他对象缩放配置")]
-    public Transform[] otherObjectsToScale; 
-    public float scaleDownDuration;   
-    public bool scaleSmoothly = true;   
+    public Transform[] otherObjectsToScale;
+    public float scaleDownDuration;
+    public bool scaleSmoothly = true;
 
     [Header("通用配置")]
-    public bool disableButtonAfterClick = true; // 点击后临时禁用按钮
-    public bool isUIObject = true;             
+    private bool disableButtonAfterClick;
+    public bool isUIObject = true;
 
-    // 私有变量
-    private Vector3 targetInitPos;         
-    private RectTransform targetRect;      
-    private Vector3[] otherObjectsInitScale; 
-    private Coroutine fallCoroutine;       // 下坠协程
+    private Vector3 _targetInitPos;
+    private RectTransform _targetRect;
+    private Vector3[] _otherObjectsInitScale;
+    private Coroutine _fallCoroutine;
 
     private void Awake()
     {
-        // 防御性校验
         if (triggerButton == null)
         {
             Debug.LogError("请绑定触发按钮！", this);
@@ -55,6 +50,7 @@ public class ButtonDropEffect : MonoBehaviour
         CacheTargetInitPosition();
         CacheOtherObjectsInitScale();
         triggerButton.onClick.AddListener(OnButtonClick);
+        disableButtonAfterClick = enableRiseThenFall;
     }
 
     #region 初始状态缓存
@@ -62,18 +58,18 @@ public class ButtonDropEffect : MonoBehaviour
     {
         if (isUIObject)
         {
-            targetRect = targetObject.GetComponent<RectTransform>();
-            if (targetRect == null)
+            _targetRect = targetObject.GetComponent<RectTransform>();
+            if (_targetRect == null)
             {
                 Debug.LogError("目标对象是UI但无RectTransform组件！", this);
                 enabled = false;
                 return;
             }
-            targetInitPos = targetRect.anchoredPosition;
+            _targetInitPos = _targetRect.anchoredPosition;
         }
         else
         {
-            targetInitPos = targetObject.position;
+            _targetInitPos = targetObject.position;
         }
     }
 
@@ -85,12 +81,12 @@ public class ButtonDropEffect : MonoBehaviour
             return;
         }
 
-        otherObjectsInitScale = new Vector3[otherObjectsToScale.Length];
+        _otherObjectsInitScale = new Vector3[otherObjectsToScale.Length];
         for (int i = 0; i < otherObjectsToScale.Length; i++)
         {
             if (otherObjectsToScale[i] != null)
             {
-                otherObjectsInitScale[i] = otherObjectsToScale[i].localScale;
+                _otherObjectsInitScale[i] = otherObjectsToScale[i].localScale;
             }
             else
             {
@@ -101,8 +97,7 @@ public class ButtonDropEffect : MonoBehaviour
     #endregion
 
     #region 按钮点击逻辑
-
-    private void OnButtonClick()
+    public void OnButtonClick()
     {
         if (disableButtonAfterClick)
         {
@@ -111,7 +106,7 @@ public class ButtonDropEffect : MonoBehaviour
 
         if (enableRiseThenFall)
         {
-            fallCoroutine = StartCoroutine(PlayRiseThenInfiniteFallAnimation());
+            _fallCoroutine = StartCoroutine(PlayRiseThenInfiniteFallAnimation());
             StartCoroutine(PlayScaleDownAnimation());
         }
         else
@@ -130,8 +125,8 @@ public class ButtonDropEffect : MonoBehaviour
             float t = riseElapsed / riseDuration;
             float progress = riseSmoothly ? Mathf.SmoothStep(0, 1, t) : t;
             Vector3 targetPos = Vector3.Lerp(
-                targetInitPos,
-                targetInitPos + new Vector3(0, moveUpDistance, 0),
+                _targetInitPos,
+                _targetInitPos + new Vector3(0, moveUpDistance, 0),
                 progress
             );
             UpdateTargetPosition(targetPos);
@@ -139,14 +134,14 @@ public class ButtonDropEffect : MonoBehaviour
             riseElapsed += Time.deltaTime;
             yield return null;
         }
-        UpdateTargetPosition(targetInitPos + new Vector3(0, moveUpDistance, 0));
+        UpdateTargetPosition(_targetInitPos + new Vector3(0, moveUpDistance, 0));
 
         float fallTime = 0f;
         float currentFallSpeed = initialFallSpeed;
         Vector3 currentPos = targetObject.position;
-        if (isUIObject) currentPos = targetRect.anchoredPosition;
+        if (isUIObject) currentPos = _targetRect.anchoredPosition;
 
-        while (true) 
+        while (true)
         {
             currentFallSpeed += gravityAcceleration * Time.deltaTime;
             float fallDelta = -currentFallSpeed * Time.deltaTime;
@@ -160,7 +155,6 @@ public class ButtonDropEffect : MonoBehaviour
     }
     #endregion
 
-
     private IEnumerator PlayResetableRiseFallAnimation()
     {
         float riseElapsed = 0f;
@@ -169,8 +163,8 @@ public class ButtonDropEffect : MonoBehaviour
             float t = riseElapsed / riseDuration;
             float progress = riseSmoothly ? Mathf.SmoothStep(0, 1, t) : t;
             Vector3 targetPos = Vector3.Lerp(
-                targetInitPos,
-                targetInitPos + new Vector3(0, moveUpDistance, 0),
+                _targetInitPos,
+                _targetInitPos + new Vector3(0, moveUpDistance, 0),
                 progress
             );
             UpdateTargetPosition(targetPos);
@@ -178,7 +172,7 @@ public class ButtonDropEffect : MonoBehaviour
             riseElapsed += Time.deltaTime;
             yield return null;
         }
-        UpdateTargetPosition(targetInitPos + new Vector3(0, moveUpDistance, 0));
+        UpdateTargetPosition(_targetInitPos + new Vector3(0, moveUpDistance, 0));
 
         float fallBackDuration = riseDuration * 0.8f;
         float fallElapsed = 0f;
@@ -187,8 +181,8 @@ public class ButtonDropEffect : MonoBehaviour
             float t = fallElapsed / fallBackDuration;
             float progress = riseSmoothly ? Mathf.SmoothStep(0, 1, t) : t;
             Vector3 targetPos = Vector3.Lerp(
-                targetInitPos + new Vector3(0, moveUpDistance, 0),
-                targetInitPos,
+                _targetInitPos + new Vector3(0, moveUpDistance, 0),
+                _targetInitPos,
                 progress
             );
             UpdateTargetPosition(targetPos);
@@ -196,11 +190,10 @@ public class ButtonDropEffect : MonoBehaviour
             fallElapsed += Time.deltaTime;
             yield return null;
         }
-        UpdateTargetPosition(targetInitPos);
+        UpdateTargetPosition(_targetInitPos);
 
         ResetState();
     }
-
 
     private IEnumerator PlayScaleDownAnimation()
     {
@@ -214,21 +207,18 @@ public class ButtonDropEffect : MonoBehaviour
             scaleElapsed += Time.deltaTime;
             yield return null;
         }
-        // 强制缩到0，防止残留
         ForceOtherObjectsToZeroScale();
 
-        // 复位模式下，缩放对象也复位
         if (!enableRiseThenFall)
         {
-            yield return new WaitForSeconds(0.1f); // 延迟复位，避免动画卡顿
+            yield return new WaitForSeconds(0.1f);
             ResetOtherObjectsScale();
         }
     }
 
-
     private void UpdateOtherObjectsScale(float progress)
     {
-        if (otherObjectsToScale == null || otherObjectsInitScale == null) return;
+        if (otherObjectsToScale == null || _otherObjectsInitScale == null) return;
 
         float clampedProgress = Mathf.Clamp01(progress);
         for (int i = 0; i < otherObjectsToScale.Length; i++)
@@ -236,14 +226,13 @@ public class ButtonDropEffect : MonoBehaviour
             if (otherObjectsToScale[i] == null) continue;
 
             Vector3 currentScale = Vector3.Lerp(
-                otherObjectsInitScale[i],
+                _otherObjectsInitScale[i],
                 Vector3.zero,
                 clampedProgress
             );
             otherObjectsToScale[i].localScale = currentScale;
         }
     }
-
 
     private void ForceOtherObjectsToZeroScale()
     {
@@ -256,20 +245,20 @@ public class ButtonDropEffect : MonoBehaviour
 
     private void ResetOtherObjectsScale()
     {
-        if (otherObjectsToScale == null || otherObjectsInitScale == null) return;
+        if (otherObjectsToScale == null || _otherObjectsInitScale == null) return;
         for (int i = 0; i < otherObjectsToScale.Length; i++)
         {
             if (otherObjectsToScale[i] == null) continue;
-            otherObjectsToScale[i].localScale = otherObjectsInitScale[i];
+            otherObjectsToScale[i].localScale = _otherObjectsInitScale[i];
         }
     }
 
     #region 通用工具方法
     private void UpdateTargetPosition(Vector3 targetPos)
     {
-        if (isUIObject && targetRect != null)
+        if (isUIObject && _targetRect != null)
         {
-            targetRect.anchoredPosition = targetPos;
+            _targetRect.anchoredPosition = targetPos;
         }
         else if (targetObject != null)
         {
@@ -279,17 +268,13 @@ public class ButtonDropEffect : MonoBehaviour
 
     public void ResetState()
     {
-        if (fallCoroutine != null)
+        if (_fallCoroutine != null)
         {
-            StopCoroutine(fallCoroutine);
-            fallCoroutine = null;
-        }
-        if (triggerButton != null)
-        {
-            triggerButton.interactable = true;
+            StopCoroutine(_fallCoroutine);
+            _fallCoroutine = null;
         }
 
-        UpdateTargetPosition(targetInitPos);
+        UpdateTargetPosition(_targetInitPos);
     }
     #endregion
 }

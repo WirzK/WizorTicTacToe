@@ -6,16 +6,18 @@ using System.Collections;
 public class DiffButtonController : MonoBehaviour
 {
     [Header("按钮")]
-    public Button btnEasy;       
+    public Button btnEasy;
     public Button btnNormal;
     public Button btnHard;
-    public RectTransform animTargetEasy;   
+    public Button btnEndless;
+    public RectTransform animTargetEasy;
     public RectTransform animTargetNormal;
-    public RectTransform animTargetHard; 
+    public RectTransform animTargetHard;
+    public RectTransform animTargetEndless;
 
     [Header("上移动画参数")]
-    public float moveUpDistance = 50f;  
-    public float moveUpDuration = 0.3f;  
+    public float moveUpDistance = 50f;
+    public float moveUpDuration = 0.3f;
 
     [Header("下落物理参数")]
     public float gravityAcceleration = 800f;
@@ -27,11 +29,13 @@ public class DiffButtonController : MonoBehaviour
 
     [Header("场景配置")]
     public string nextSceneName = "PlayScene";
+    public string endlessSceneName = "EndlessScene";
     public SaveManager saveManager;
 
     private Vector3 animTargetEasyInitPos;
     private Vector3 animTargetNormalInitPos;
     private Vector3 animTargetHardInitPos;
+    private Vector3 animTargetEndlessInitPos;
 
     private void Awake()
     {
@@ -47,15 +51,12 @@ public class DiffButtonController : MonoBehaviour
         animTargetEasyInitPos = animTargetEasy.anchoredPosition;
         animTargetNormalInitPos = animTargetNormal.anchoredPosition;
         animTargetHardInitPos = animTargetHard.anchoredPosition;
+        animTargetEndlessInitPos = animTargetEndless.anchoredPosition;
 
         btnEasy.onClick.AddListener(() => OnDifficultyButtonClick(btnEasy, 1));
         btnNormal.onClick.AddListener(() => OnDifficultyButtonClick(btnNormal, 2));
         btnHard.onClick.AddListener(() => OnDifficultyButtonClick(btnHard, 3));
-    }
-
-    public void Start()
-    {
-
+        btnEndless.onClick.AddListener(() => OnDifficultyButtonClick(btnEndless, 4));
     }
 
     private void OnDifficultyButtonClick(Button clickedBtn, int difficulty)
@@ -73,7 +74,6 @@ public class DiffButtonController : MonoBehaviour
 
     private IEnumerator ExecuteButtonAnimation(Button clickedBtn)
     {
-        // 获取被点击按钮对应的动画目标和初始位置
         RectTransform clickedTargetRect = null;
         Vector3 initPos = Vector3.zero;
 
@@ -92,10 +92,15 @@ public class DiffButtonController : MonoBehaviour
             clickedTargetRect = animTargetHard;
             initPos = animTargetHardInitPos;
         }
+        else if (clickedBtn == btnEndless)
+        {
+            clickedTargetRect = animTargetEndless;
+            initPos = animTargetEndlessInitPos;
+        }
 
         if (clickedTargetRect == null)
         {
-            Debug.LogError("【DiffButtonController】被点击按钮对应的动画目标为空");
+            Debug.LogError("被点击按钮对应的动画目标为空");
             yield break;
         }
 
@@ -110,11 +115,11 @@ public class DiffButtonController : MonoBehaviour
         clickedTargetRect.anchoredPosition = initPos + new Vector3(0, moveUpDistance, 0);
 
         float currentDropVelocity = initialDropVelocity;
-        float totalDropDistance = 0f; 
+        float totalDropDistance = 0f;
         Vector3 currentPos = clickedTargetRect.anchoredPosition;
 
         RectTransform[] otherTargets = GetOtherAnimationTargets(clickedBtn);
-        Vector3[] otherTargetsInitScale = new Vector3[2];
+        Vector3[] otherTargetsInitScale = new Vector3[3];
         for (int i = 0; i < otherTargets.Length; i++)
         {
             if (otherTargets[i] != null)
@@ -132,7 +137,7 @@ public class DiffButtonController : MonoBehaviour
             currentPos.y -= dropDelta;
             clickedTargetRect.anchoredPosition = currentPos;
 
-            float scaleElapsed = Time.time - (Time.time - scaleDownTime); 
+            float scaleElapsed = Time.time - (Time.time - scaleDownTime);
             float scaleT = Mathf.Clamp01(scaleElapsed / scaleDownTime);
             for (int i = 0; i < otherTargets.Length; i++)
             {
@@ -145,7 +150,6 @@ public class DiffButtonController : MonoBehaviour
             yield return null;
         }
 
-
         foreach (RectTransform target in otherTargets)
         {
             if (target != null)
@@ -155,26 +159,31 @@ public class DiffButtonController : MonoBehaviour
         }
 
         yield return new WaitForSeconds(0.1f);
-        SceneManager.LoadScene(nextSceneName);
+        if (clickedBtn == btnEndless)
+            SceneManager.LoadScene(endlessSceneName);
+        else
+            SceneManager.LoadScene(nextSceneName);
     }
-
 
     private RectTransform[] GetOtherAnimationTargets(Button clickedBtn)
     {
         if (clickedBtn == btnEasy)
         {
-            return new RectTransform[] { animTargetNormal, animTargetHard };
+            return new RectTransform[] { animTargetNormal, animTargetHard, animTargetEndless };
         }
         else if (clickedBtn == btnNormal)
         {
-            return new RectTransform[] { animTargetEasy, animTargetHard };
+            return new RectTransform[] { animTargetEasy, animTargetHard, animTargetEndless };
         }
-        else 
+        else if (clickedBtn == btnHard)
         {
-            return new RectTransform[] { animTargetEasy, animTargetNormal };
+            return new RectTransform[] { animTargetEasy, animTargetNormal, animTargetEndless };
+        }
+        else
+        {
+            return new RectTransform[] { animTargetEasy, animTargetNormal, animTargetHard };
         }
     }
-
 
     private Button[] GetOtherButtons(Button clickedBtn)
     {
@@ -186,17 +195,17 @@ public class DiffButtonController : MonoBehaviour
         {
             return new Button[] { btnEasy, btnHard };
         }
-        else 
+        else
         {
             return new Button[] { btnEasy, btnNormal };
         }
     }
 
-
     public enum DifficultyType
     {
-        Easy = 1,    
-        Normal = 2,  
-        Hard = 3     
+        Easy = 1,
+        Normal = 2,
+        Hard = 3,
+        Endless = 4
     }
 }

@@ -4,13 +4,12 @@ using UnityEngine.UI;
 using System;
 using System.Reflection;
 
-
 [RequireComponent(typeof(Button))]
 public class CustomizedBtn : MonoBehaviour
 {
     [Header("单例配置")]
     [Tooltip("单例类")]
-    public string singletonClassName = "SaveManager"; 
+    public string singletonClassName = "SaveManager";
     [Tooltip("单例中的函数名")]
     public string targetFunctionName = "ConfirmDeleteShared";
 
@@ -44,7 +43,7 @@ public class CustomizedBtn : MonoBehaviour
             return;
         }
 
-        object singletonInstance = instanceField.GetValue(null); 
+        object singletonInstance = instanceField.GetValue(null);
         if (singletonInstance == null)
         {
             Debug.LogError($"[{name}] 单例{singletonClassName}的instance为空！");
@@ -53,9 +52,9 @@ public class CustomizedBtn : MonoBehaviour
 
         MethodInfo targetMethod = singletonType.GetMethod(
             targetFunctionName,
-            BindingFlags.Public | BindingFlags.Instance, 
+            BindingFlags.Public | BindingFlags.Instance,
             Type.DefaultBinder,
-            Type.EmptyTypes, 
+            Type.EmptyTypes,
             null
         );
 
@@ -64,6 +63,7 @@ public class CustomizedBtn : MonoBehaviour
             Debug.LogError($"[{name}] 单例{singletonClassName}中未找到无参的public函数：{targetFunctionName}！");
             return;
         }
+
         UnityAction onClickAction = () => targetMethod.Invoke(singletonInstance, null);
         _button.onClick.AddListener(onClickAction);
 

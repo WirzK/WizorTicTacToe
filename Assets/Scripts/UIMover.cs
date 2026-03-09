@@ -2,18 +2,10 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>
-/// UI位置缓动控制（适配RectTransform）
-/// 功能：将脚本所在UI的X坐标先瞬间设为-700，再1秒匀速移回-200
-/// </summary>
 public class UIMover : MonoBehaviour
 {
-    [Header("缓动配置")]
-    [Tooltip("初始偏移X")]
     public float startPosX;
-    [Tooltip("目标偏移X")]
     public float targetPosX;
-    [Tooltip("缓动时长")]
     public float moveDuration;
     public bool moveOnStart = true;
 

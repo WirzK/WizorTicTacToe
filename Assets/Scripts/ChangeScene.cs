@@ -18,7 +18,7 @@ public class ChangeScene : MonoBehaviour
     [Tooltip("是否启用场景切换延迟")]
     public bool isDelayEnabled = false;
     [Tooltip("延迟时间")]
-    public float delayTime = 1f; // 默认延迟1秒
+    public float delayTime = 1f;
 
     private void Awake()
     {
@@ -35,8 +35,6 @@ public class ChangeScene : MonoBehaviour
 
     private void OnButtonClick()
     {
-
-        // 判断是否启用延迟：启用则走协程延迟加载，否则立即加载
         if (isDelayEnabled)
         {
             StartCoroutine(LoadSceneAfterDelay());
@@ -46,11 +44,12 @@ public class ChangeScene : MonoBehaviour
             LoadTargetScene();
         }
     }
+
     private IEnumerator LoadSceneAfterDelay()
     {
         Debug.Log($"将在{delayTime}秒后跳转到场景：{targetSceneName}");
-        yield return new WaitForSeconds(delayTime); 
-        LoadTargetScene(); 
+        yield return new WaitForSeconds(delayTime);
+        LoadTargetScene();
     }
 
     private void LoadTargetScene()

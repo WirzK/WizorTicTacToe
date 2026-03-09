@@ -5,15 +5,12 @@ public class SaveManager : MonoBehaviour
 {
     public static SaveManager instance;
 
-    public const int SAVE_SLOT_COUNT = 3; 
+    public const int SAVE_SLOT_COUNT = 3;
     private const string SAVE_KEY_PREFIX = "TicTacToe_Save_";
 
     public int currentSaveIndex = 0;
-
     public SaveData[] allSaveDatas = new SaveData[SAVE_SLOT_COUNT];
-
     public int tempDeleteSlotIndex = -1;
-
     public int diff = 1;
 
     private void Awake()
@@ -24,22 +21,23 @@ public class SaveManager : MonoBehaviour
             DontDestroyOnLoad(gameObject);
             InitAllSaves();
             SceneManager.sceneLoaded += OnSceneLoaded;
-            Debug.Log("SaveManager已初始化，跨场景常驻");
+            Debug.Log("SaveManager有了");
         }
         else
         {
             if (instance != this)
             {
                 Destroy(gameObject);
-                Debug.Log("检测到重复的SaveManager，已销毁");
+                Debug.Log("SaveManager重复了，我给删了");
             }
         }
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        Debug.Log($"场景{scene.name}加载完成，存档数据保持不变");
+        Debug.Log($"场景{scene.name}加载完成，存档正常");
     }
+
     public void InitAllSaves()
     {
         for (int i = 0; i < SAVE_SLOT_COUNT; i++)
@@ -47,6 +45,7 @@ public class SaveManager : MonoBehaviour
             allSaveDatas[i] = LoadSave(i);
         }
     }
+
     public SaveData LoadSave(int saveIndex)
     {
         if (saveIndex < 0 || saveIndex >= SAVE_SLOT_COUNT)
@@ -68,7 +67,7 @@ public class SaveManager : MonoBehaviour
         }
         else
         {
-            saveData.Reset();
+            saveData.Reset(); // Reset会初始化无尽模式记录为0
             SaveSave(saveIndex, saveData);
         }
 
@@ -89,6 +88,7 @@ public class SaveManager : MonoBehaviour
         PlayerPrefs.Save();
 
         allSaveDatas[saveIndex] = saveData;
+        Debug.Log($"存档{saveIndex}保存完成，无尽模式最高胜场：{saveData.diff4BestWinStreak}");
     }
 
     public void DeleteSave(int saveIndex)
@@ -100,11 +100,12 @@ public class SaveManager : MonoBehaviour
         }
 
         SaveData emptySave = new SaveData();
-        emptySave.Reset();
+        emptySave.Reset(); // 重置包含无尽模式记录为0
         SaveSave(saveIndex, emptySave);
 
         Debug.Log($"存档{saveIndex + 1}已删除，重置为空存档");
     }
+
     //给按钮用的
     public void ConfirmDeleteShared()
     {
@@ -141,9 +142,23 @@ public class SaveManager : MonoBehaviour
     public void UpdateCurrentSaveDiffRecord(int difficulty, float newTime, int newStep)
     {
         SaveData currentSave = allSaveDatas[currentSaveIndex];
-        currentSave.isEmpty = false; 
-        currentSave.UpdateDiffRecord(difficulty, newTime, newStep); 
+        currentSave.isEmpty = false;
+        currentSave.UpdateDiffRecord(difficulty, newTime, newStep);
         SaveSave(currentSaveIndex, currentSave);
+    }
+
+    public void UpdateCurrentSaveEndlessRecord(int newWinStreak)
+    {
+        SaveData currentSave = allSaveDatas[currentSaveIndex];
+        currentSave.isEmpty = false; // 标记存档非空
+        currentSave.UpdateEndlessRecord(newWinStreak); // 调用SaveData的无尽更新方法
+        SaveSave(currentSaveIndex, currentSave); // 立即保存到文件
+    }
+
+    public int GetCurrentEndlessBestWinStreak()
+    {
+        SaveData currentSave = allSaveDatas[currentSaveIndex];
+        return currentSave.diff4BestWinStreak;
     }
 
     public SaveData GetCurrentSave()

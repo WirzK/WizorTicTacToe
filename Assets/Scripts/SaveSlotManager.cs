@@ -4,7 +4,6 @@ using TMPro;
 using UnityEngine.SceneManagement;
 using System.Collections;
 
-
 [RequireComponent(typeof(Button))]
 public class SaveSlotManager : MonoBehaviour
 {
@@ -17,37 +16,39 @@ public class SaveSlotManager : MonoBehaviour
     public TextMeshProUGUI txtSaveName;
 
     [Header("简单难度")]
-    public TextMeshProUGUI txtDiff1_Name;   
-    public TextMeshProUGUI txtDiff1_Time;  
-    public TextMeshProUGUI txtDiff1_Step;    
+    public TextMeshProUGUI txtDiff1_Name;
+    public TextMeshProUGUI txtDiff1_Time;
+    public TextMeshProUGUI txtDiff1_Step;
 
     [Header("中等难度")]
-    public TextMeshProUGUI txtDiff2_Name;  
-    public TextMeshProUGUI txtDiff2_Time;   
-    public TextMeshProUGUI txtDiff2_Step;  
+    public TextMeshProUGUI txtDiff2_Name;
+    public TextMeshProUGUI txtDiff2_Time;
+    public TextMeshProUGUI txtDiff2_Step;
 
-    [Header("困难难度）")]
-    public TextMeshProUGUI txtDiff3_Name;   
-    public TextMeshProUGUI txtDiff3_Time;   
-    public TextMeshProUGUI txtDiff3_Step;   
+    [Header("困难难度")]
+    public TextMeshProUGUI txtDiff3_Name;
+    public TextMeshProUGUI txtDiff3_Time;
+    public TextMeshProUGUI txtDiff3_Step;
 
-    public Button btnDelete;           
-    public Button btnStart;             
-    public GameObject deleteConfirmPanel; 
+    [Header("无尽模式")]
+    public TextMeshProUGUI txtDiff4_Name;    
+    public TextMeshProUGUI txtDiff4_WinStreak;
+
+    public Button btnDelete;
+    public Button btnStart;
+    public GameObject deleteConfirmPanel;
 
     [Header("空存档UI")]
-    public GameObject emptyObj1;        
-    public GameObject emptyObj2;       
-    public Button btnCreate;           
+    public GameObject emptyObj1;
+    public GameObject emptyObj2;
+    public Button btnCreate;
     public TMP_InputField inputSaveName;
-    public Button btnConfirmCreate;    
+    public Button btnConfirmCreate;
 
-    private SaveData currentSaveData;  
-    private bool isDeletePanelShow = false;
+    private SaveData currentSaveData;
 
     private void Awake()
     {
-
         InitButtonEvents();
         if (deleteConfirmPanel != null) deleteConfirmPanel.SetActive(false);
     }
@@ -66,6 +67,7 @@ public class SaveSlotManager : MonoBehaviour
         if (btnCreate != null) btnCreate.onClick.AddListener(OnClickCreate);
         if (btnConfirmCreate != null) btnConfirmCreate.onClick.AddListener(OnConfirmCreate);
     }
+
     public void RefreshSlotDisplay()
     {
         currentSaveData = saveManager.LoadSave(slotIndex);
@@ -99,6 +101,9 @@ public class SaveSlotManager : MonoBehaviour
         if (txtDiff3_Time != null) txtDiff3_Time.gameObject.SetActive(isActive);
         if (txtDiff3_Step != null) txtDiff3_Step.gameObject.SetActive(isActive);
 
+        if (txtDiff4_Name != null) txtDiff4_Name.gameObject.SetActive(isActive);
+        if (txtDiff4_WinStreak != null) txtDiff4_WinStreak.gameObject.SetActive(isActive);
+
         if (btnDelete != null) btnDelete.gameObject.SetActive(isActive);
         if (btnStart != null) btnStart.gameObject.SetActive(isActive);
     }
@@ -106,7 +111,7 @@ public class SaveSlotManager : MonoBehaviour
     private void SetEmptyUIActive(bool isActive)
     {
         if (emptyObj1 != null) emptyObj1.SetActive(isActive);
-        if (emptyObj2 != null) emptyObj2.SetActive(false); 
+        if (emptyObj2 != null) emptyObj2.SetActive(false);
         if (inputSaveName != null) inputSaveName.gameObject.SetActive(false);
     }
 
@@ -117,6 +122,8 @@ public class SaveSlotManager : MonoBehaviour
         UpdateSingleDiffDisplay(1, txtDiff1_Name, txtDiff1_Time, txtDiff1_Step);
         UpdateSingleDiffDisplay(2, txtDiff2_Name, txtDiff2_Time, txtDiff2_Step);
         UpdateSingleDiffDisplay(3, txtDiff3_Name, txtDiff3_Time, txtDiff3_Step);
+
+        UpdateEndlessDiffDisplay(txtDiff4_Name, txtDiff4_WinStreak);
     }
 
     private void UpdateSingleDiffDisplay(int diff, TextMeshProUGUI txtName, TextMeshProUGUI txtTime, TextMeshProUGUI txtStep)
@@ -132,7 +139,7 @@ public class SaveSlotManager : MonoBehaviour
             case 1:
                 time = currentSaveData.diff1BestTime;
                 step = currentSaveData.diff1BestStep;
-                diffName = "Easy"; 
+                diffName = "Easy";
                 break;
             case 2:
                 time = currentSaveData.diff2BestTime;
@@ -160,12 +167,29 @@ public class SaveSlotManager : MonoBehaviour
         }
     }
 
+    private void UpdateEndlessDiffDisplay(TextMeshProUGUI txtName, TextMeshProUGUI txtWinStreak)
+    {
+        if (txtName == null || txtWinStreak == null) return;
+
+        txtName.text = "Endless";
+
+        int bestWinStreak = currentSaveData.diff4BestWinStreak;
+        if (bestWinStreak <= 0)
+        {
+            txtWinStreak.text = "Best: None";
+        }
+        else
+        {
+            txtWinStreak.text = $"Best: {bestWinStreak}";
+        }
+    }
+
     #region 非空存档交互逻辑
     private void ShowDeleteConfirm()
     {
         if (currentSaveData.isEmpty)
         {
-            Debug.LogWarning($"存档位{slotIndex}为空，无需删除");
+            Debug.LogWarning($"存档位{slotIndex}为空");
             return;
         }
 
@@ -174,7 +198,6 @@ public class SaveSlotManager : MonoBehaviour
         if (deleteConfirmPanel != null)
         {
             deleteConfirmPanel.SetActive(true);
-            isDeletePanelShow = true;
         }
     }
 

@@ -7,21 +7,22 @@ public class UIManager : MonoBehaviour
 {
     public static UIManager instance;
 
-    [Header("核心UI")]
+    [Header("菜单和棋盘")]
     public TextMeshProUGUI timerText;
     public TextMeshProUGUI stepText;
     public TextMeshProUGUI diffText;
     public Button[] tileButtons;
     public Transform[] tiles;
 
-    [Header("三个独立结算面板")]
+    [Header("结算面板")]
     public GameObject winPanel; 
     public GameObject losePanel; 
     public GameObject drawPanel;  
 
     public TextMeshProUGUI winTimeText;   
     public TextMeshProUGUI winStepText;   
-    public TextMeshProUGUI winRecordText; 
+    public TextMeshProUGUI winRecordText;
+
 
     private void Awake()
     {
@@ -43,6 +44,9 @@ public class UIManager : MonoBehaviour
                 break;
             case 3:
                 diffText.text = "Hard";
+                break;
+            case 4:
+                diffText.text = "Endless";
                 break;
         }
     }
@@ -117,7 +121,7 @@ public class UIManager : MonoBehaviour
         }
         else if (playerWin)
         {
-            // 显示胜利面板 + 计算破纪录 + 填充时间/步数
+            // 显示胜利面板 + 计算破纪录 + 填充时间步数
             winPanel.SetActive(true);
             UpdateWinPanel(time, steps);
         }
@@ -138,7 +142,6 @@ public class UIManager : MonoBehaviour
         SaveData currentSave = SaveManager.instance.GetCurrentSave();
         if (currentSave == null) return;
 
-        // 根据难度读取对应记录（1=Easy, 2=Normal, 3=Hard）
         float bestTime = float.MaxValue;
         int bestStep = int.MaxValue;
         switch (currentDifficulty)
@@ -197,7 +200,7 @@ public class UIManager : MonoBehaviour
 
     private string FormatTime(float time)
     {
-        if (time == float.MaxValue) return "--:--"; // 无纪录时显示
+        if (time == float.MaxValue) return "--:--"; // 无纪录
         int minutes = Mathf.FloorToInt(time / 60f);
         int seconds = Mathf.FloorToInt(time % 60f);
         return string.Format("{0:00}:{1:00}", minutes, seconds);

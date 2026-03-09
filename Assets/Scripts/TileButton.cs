@@ -1,54 +1,85 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.Tilemaps;
-using UnityEngine.U2D;
 using UnityEngine.UI;
 
 public class TileButton : MonoBehaviour, IPointerClickHandler
 {
-    private int tileIndex;       
-    public Sprite playerImage; 
+    private int tileIndex;
+    public Sprite playerImage;
     public Sprite aiImage;
     public Sprite emptyImage;
     public GameObject tileImage;
-    private Button selfButton;     
+    private Button selfButton;
+
     private void Awake()
     {
-        selfButton = GetComponent<Button>();   
+        selfButton = GetComponent<Button>();
     }
+
     private void Start()
     {
         tileIndex = transform.GetSiblingIndex();
 
-        playerImage = Resources.Load<Sprite>("Images/o");
-        aiImage = Resources.Load<Sprite>("Images/x");
-        emptyImage = Resources.Load<Sprite>("Images/empty");
+        playerImage = Resources.Load<Sprite>("Images/o") ?? playerImage;
+        aiImage = Resources.Load<Sprite>("Images/x") ?? aiImage;
+        emptyImage = Resources.Load<Sprite>("Images/empty") ?? emptyImage;
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        // 只有满足“玩家回合、游戏激活、按钮可点击”才响应
-        if (GameManager.instance.isPlayerTurn && GameManager.instance.isGameActive && selfButton.interactable)
+        if (!selfButton.interactable) return;
+
+        if (GameManager.instance != null)
         {
-            
-            GameManager.instance.PlayerMove(tileIndex);
-            tileImage.SetActive(true);
-            tileImage.GetComponent<Image>().sprite = playerImage; 
-            selfButton.interactable = false;
+            if (GameManager.instance.isPlayerTurn && GameManager.instance.isGameActive)
+            {
+                GameManager.instance.PlayerMove(tileIndex);
+                UpdateTileUI(1);
+                selfButton.interactable = false;
+            }
+        }
+        else if (EndlessManager.instance != null)
+        {
+            var endlessMgr = EndlessManager.instance;
+            if (endlessMgr.isGameActive && endlessMgr.isPlayerTurn && endlessMgr.currentPhase == EndlessGamePhase.Battle)
+            {
+                endlessMgr.PlayerMove(tileIndex);
+            }
         }
     }
-    //电脑用的
+
     public void SetTileSpriteAndDisable()
     {
+        UpdateTileUI(2);
         selfButton.interactable = false;
-        tileImage.SetActive(true);
-        tileImage.GetComponent<Image>().sprite = aiImage;
     }
+
+    public void SetPlayerTileSpriteAndDisable()
+    {
+        UpdateTileUI(1);
+        selfButton.interactable = false;
+    }
+
     public void ResetTile()
     {
         selfButton.interactable = true;
         tileImage.GetComponent<Image>().sprite = emptyImage;
         tileImage.SetActive(false);
+    }
+
+    private void UpdateTileUI(int playerType)
+    {
+        if (tileImage == null) return;
+
+        tileImage.SetActive(true);
+        if (playerType == 1) // 玩家
+        {
+            tileImage.GetComponent<Image>().sprite = playerImage;
+        }
+        else if (playerType == 2) // AI
+        {
+            tileImage.GetComponent<Image>().sprite = aiImage;
+        }
     }
 
     public int GetTileIndex()

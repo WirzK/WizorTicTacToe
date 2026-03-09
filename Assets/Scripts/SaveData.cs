@@ -3,26 +3,23 @@ using UnityEngine;
 [System.Serializable]
 public class SaveData
 {
-    // 存档基础信息
-    public string saveName = "未命名存档"; 
-    public bool isEmpty = true;            
+    public string saveName = "未命名存档";
+    public bool isEmpty = true;
 
-    // 分难度记录（1=简单，2=中等，3=困难）
-    public float diff1BestTime = float.MaxValue; 
-    public int diff1BestStep = int.MaxValue;     
-    public float diff2BestTime = float.MaxValue; 
-    public int diff2BestStep = int.MaxValue;    
-    public float diff3BestTime = float.MaxValue; 
-    public int diff3BestStep = int.MaxValue;    
+    public float diff1BestTime = float.MaxValue;
+    public int diff1BestStep = int.MaxValue;
+    public float diff2BestTime = float.MaxValue;
+    public int diff2BestStep = int.MaxValue;
+    public float diff3BestTime = float.MaxValue;
+    public int diff3BestStep = int.MaxValue;
 
-    /// <summary>
-    /// 重置存档为初始状态（删除存档/新建空存档时调用）
-    /// </summary>
+    public int diff4BestWinStreak = 0;
+
     public void Reset()
     {
         saveName = "未命名存档";
         isEmpty = true;
-        ResetDiffRecords(); // 重置各难度记录
+        ResetDiffRecords();
     }
 
     public void ResetDiffRecords()
@@ -33,6 +30,9 @@ public class SaveData
         diff2BestStep = int.MaxValue;
         diff3BestTime = float.MaxValue;
         diff3BestStep = int.MaxValue;
+
+        // 重置无尽模式记录
+        diff4BestWinStreak = 0;
     }
 
     public void UpdateDiffRecord(int difficulty, float newTime, int newStep)
@@ -52,8 +52,32 @@ public class SaveData
                 if (newStep < diff3BestStep) diff3BestStep = newStep;
                 break;
             default:
-                Debug.LogError($"无效难度值：{difficulty}（仅支持1-3）");
+                Debug.LogError($"无效难度值：{difficulty}（传统难度仅支持1-3）");
                 break;
+        }
+    }
+
+    public void UpdateEndlessRecord(int newWinStreak)
+    {
+        if (newWinStreak > diff4BestWinStreak)
+        {
+            diff4BestWinStreak = newWinStreak;
+        }
+    }
+
+    public void UpdateRecordByDiff(int difficulty, float newTime = 0f, int newStep = 0, int newWinStreak = 0)
+    {
+        if (difficulty >= 1 && difficulty <= 3)
+        {
+            UpdateDiffRecord(difficulty, newTime, newStep);
+        }
+        else if (difficulty == 4)
+        {
+            UpdateEndlessRecord(newWinStreak);
+        }
+        else
+        {
+            Debug.LogError($"无效难度值：{difficulty}（仅支持1-4，4=无尽模式）");
         }
     }
 }
