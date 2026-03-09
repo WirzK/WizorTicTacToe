@@ -3,6 +3,7 @@
 ## 项目简介
 本项目是一款带有**无尽模式**的井字棋游戏，在经典井字棋玩法基础上，新增动态难度、道具系统、资源管理与存档机制。
 游戏以「基础模式固定三档难度」+「无尽模式动态难度」为核心，结合 `Minimax`算法实现差异化 AI 逻辑，兼顾新手友好性与高阶玩家的挑战性，同时通过道具策略与成就记录提升长期可玩性。
+建议下载后试玩，链接：https://pan.baidu.com/s/182TCluvMGMAvOLdc4ZuSdg?pwd=2333 
 可在 https://pigeonwizor.itch.io/pigeonwizor-tictactoe 试玩。
 
 ---
