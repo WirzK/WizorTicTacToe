@@ -637,7 +637,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &276349121
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2033,7 +2033,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1204334467
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2361,7 +2361,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1239979761
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2437,7 +2437,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1255810803
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2527,7 +2527,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1356155329
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2925,7 +2925,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bgmSource: {fileID: 0}
-  defaultBGM: {fileID: 8300000, guid: b5ba7cbe0fe3b6740bfac6745436297b, type: 3}
+  defaultBGM: {fileID: 8300000, guid: ee48ce762fcfa35458cfb671661de1d2, type: 3}
   bgmVolume: 0.8
   sfxSource: {fileID: 0}
   clickClip: {fileID: 8300000, guid: a243bd2f966a0b644aed5d47ab37c907, type: 3}
@@ -3247,7 +3247,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1854849077
 RectTransform:
   m_ObjectHideFlags: 0
